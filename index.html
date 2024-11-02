@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Die Roller</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .die {
+            width: 100px;
+            height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            border: 1px solid #333;
+            border-radius: 10px;
+            background: #f0f0f0;
+            perspective: 1000px;
+            transform-style: preserve-3d;
+        }
+
+        .roll-button {
+            margin: 20px;
+            padding: 10px 20px;
+            font-size: 18px;
+        }
+
+        .roll-history {
+            margin-top: 20px;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <h1>3D Die Roller</h1>
+    <div id="die" class="die">1</div>
+    <button id="rollButton" class="roll-button">Roll</button>
+    <div class="roll-history">
+        <h3>Last 5 Rolls:</h3>
+        <ul id="rollHistory"></ul>
+    </div>
+
+    <script>
+        const die = document.getElementById('die');
+        const rollButton = document.getElementById('rollButton');
+        const rollHistory = document.getElementById('rollHistory');
+        let history = [];
+
+        function rollDie() {
+            rollButton.disabled = true;
+            let count = 0;
+            const interval = setInterval(() => {
+                const randomNumber = Math.floor(Math.random() * 6) + 1;
+                die.textContent = randomNumber;
+                count++;
+                if (count === 20) {
+                    clearInterval(interval);
+                    rollButton.disabled = false;
+                    addToHistory(randomNumber);
+                }
+            }, 100); // Rolls for 2 seconds (20 * 100ms)
+        }
+
+        function addToHistory(number) {
+            history.unshift(number);
+            if (history.length > 5) history.pop();
+            updateHistory();
+        }
+
+        function updateHistory() {
+            rollHistory.innerHTML = '';
+            history.forEach((roll, index) => {
+                const listItem = document.createElement('li');
+                listItem.textContent = `Roll ${index + 1}: ${roll}`;
+                rollHistory.appendChild(listItem);
+            });
+        }
+
+        rollButton.addEventListener('click', rollDie);
+    </script>
+</body>
+</html>
