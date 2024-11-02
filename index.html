@@ -8,13 +8,26 @@
 </head>
 <body>
     <h1>Die-Roll</h1>
-    <label for="diceCount">Number of Dice:</label>
-    <input type="number" id="diceCount" class="dice-count" min="1" max="10" value="1">
+    <div>
+        <button id="removeDie" class="adjust-button">–</button>
+        <span id="diceCountDisplay" class="dice-count-display">1</span>
+        <button id="addDie" class="adjust-button">+</button>
+    </div>
     <button id="rollButton" class="roll-button">Roll</button>
     <div class="dice-container" id="diceContainer"></div>
-    <div class="roll-history">
-        <h3>Last 5 Rolls:</h3>
-        <ul id="rollHistory"></ul>
+    <div class="roll-results">
+        <h3>Roll Results</h3>
+        <table id="resultTable">
+            <thead>
+                <tr>
+                    <th>Die</th>
+                    <th>Value</th>
+                </tr>
+            </thead>
+            <tbody id="resultTableBody">
+            </tbody>
+        </table>
+        <div id="totalScore"></div>
     </div>
     <script src="script.js"></script>
 </body>
