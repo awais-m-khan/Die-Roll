@@ -307,35 +307,27 @@
 
         function addToHistory(values) {
             const total = values.reduce((sum, value) => sum + value, 0);
-            const rollTime = new Date().toLocaleTimeString();
-            const historyEntry = {
-                time: rollTime,
-                values,
-                total
-            };
-            history.unshift(historyEntry);
-            if (history.length > 5) history.pop();
-            updateHistory();
-        }
-
-        function updateHistory() {
-            rollHistory.innerHTML = '';
-            history.forEach(entry => {
-                const listItem = document.createElement('li');
-                listItem.textContent = `${entry.time} - Total: ${entry.total}, Rolls: ${entry.values.join(', ')}`;
-                rollHistory.appendChild(listItem);
-            });
-        }
-
-        rollButton.addEventListener('click', rollDice);
-    </script>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Die-Roll</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>Die-Roll</h1>
+    <label for="diceCount">Number of Dice:</label>
+    <input type="number" id="diceCount" class="dice-count" min="1" max="10" value="1">
+    <button id="rollButton" class="roll-button">Roll</button>
+    <div class="dice-container" id="diceContainer"></div>
+    <div class="roll-history">
+        <h3>Last 5 Rolls:</h3>
+        <ul id="rollHistory"></ul>
+    </div>
+    <script src="script.js"></script>
 </body>
-</html>y.total}, Rolls: ${entry.values.join(', ')}`;
-                rollHistory.appendChild(listItem);
-            });
-        }
-
-        rollButton.addEventListener('click', rollDice);
+</html>Button.addEventListener('click', rollDice);
     </script>
 </body>
 </html>
