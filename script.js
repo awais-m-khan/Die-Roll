@@ -1,72 +1,68 @@
 const rollButton = document.getElementById('rollButton');
-const diceCountInput = document.getElementById('diceCount');
+const addDieButton = document.getElementById('addDie');
+const removeDieButton = document.getElementById('removeDie');
+const diceCountDisplay = document.getElementById('diceCountDisplay');
 const diceContainer = document.getElementById('diceContainer');
-const rollHistory = document.getElementById('rollHistory');
-let history = [];
+const resultTableBody = document.getElementById('resultTableBody');
+const totalScoreDisplay = document.getElementById('totalScore');
+let diceCount = 1;
 
-function createDieElement() {
-    const die = document.createElement('div');
-    die.classList.add('die');
-    return die;
-}
+function createCube() {
+    const cube = document.createElement('div');
+    cube.classList.add('cube');
 
-function updateDieFace(die, value) {
-    die.innerHTML = '';
-    die.setAttribute('data-value', value);
-    for (let i = 0; i < value; i++) {
-        const dot = document.createElement('div');
-        dot.classList.add('dot');
-        die.appendChild(dot);
+    for (let i = 1; i <= 6; i++) {
+        const face = document.createElement('div');
+        face.classList.add('face', `face-${i}`);
+        face.textContent = i; // Replace this with dots if needed
+        cube.appendChild(face);
     }
+
+    return cube;
 }
 
 function rollDice() {
     rollButton.disabled = true;
-    let count = 0;
-    const dice = [];
+    resultTableBody.innerHTML = '';
     diceContainer.innerHTML = '';
-    const numDice = Math.min(Math.max(diceCountInput.value, 1), 10);
-    for (let i = 0; i < numDice; i++) {
-        const die = createDieElement();
-        dice.push(die);
-        diceContainer.appendChild(die);
+    let totalScore = 0;
+
+    for (let i = 0; i < diceCount; i++) {
+        const cube = createCube();
+        const randomValue = Math.floor(Math.random() * 6) + 1;
+        totalScore += randomValue;
+
+        // Apply rotation for the random value
+        let rotationX = 0;
+        let rotationY = 0;
+        switch(randomValue) {
+            case 1: rotationX = 0; rotationY = 0; break;
+            case 2: rotationX = 0; rotationY = 90; break;
+            case 3: rotationX = 0; rotationY = 180; break;
+            case 4: rotationX = 0; rotationY = -90; break;
+            case 5: rotationX = 90; rotationY = 0; break;
+            case 6: rotationX = -90; rotationY = 0; break;
+        }
+
+        cube.style.transform = `rotateX(${rotationX}deg) rotateY(${rotationY}deg)`;
+        diceContainer.appendChild(cube);
+
+        // Add result to the table
+        const row = document.createElement('tr');
+        row.innerHTML = `<td>Die ${i + 1}</td><td>${randomValue}</td>`;
+        resultTableBody.appendChild(row);
     }
 
-    const interval = setInterval(() => {
-        dice.forEach(die => {
-            const randomValue = Math.floor(Math.random() * 6) + 1;
-            updateDieFace(die, randomValue);
-        });
-        count++;
-        if (count === 5) {
-            clearInterval(interval);
-            rollButton.disabled = false;
-            const finalValues = dice.map(die => parseInt(die.getAttribute('data-value')));
-            addToHistory(finalValues);
-        }
-    }, 100); // Rolls for 0.5 seconds (5 * 100ms)
+    // Display the total score
+    totalScoreDisplay.textContent = `Total Score: ${totalScore}`;
+    rollButton.disabled = false;
 }
 
-function addToHistory(values) {
-    const total = values.reduce((sum, value) => sum + value, 0);
-    const rollTime = new Date().toLocaleTimeString();
-    const historyEntry = {
-        time: rollTime,
-        values,
-        total
-    };
-    history.unshift(historyEntry);
-    if (history.length > 5) history.pop();
-    updateHistory();
-}
-
-function updateHistory() {
-    rollHistory.innerHTML = '';
-    history.forEach(entry => {
-        const listItem = document.createElement('li');
-        listItem.textContent = `${entry.time} - Total: ${entry.total}, Rolls: ${entry.values.join(', ')}`;
-        rollHistory.appendChild(listItem);
-    });
+function updateDiceCount(change) {
+    diceCount = Math.max(1, Math.min(3, diceCount + change));
+    diceCountDisplay.textContent = diceCount;
 }
 
 rollButton.addEventListener('click', rollDice);
+addDieButton.addEventListener('click', () => updateDiceCount(1));
+removeDieButton.addEventListener('click', () => updateDiceCount(-1));
