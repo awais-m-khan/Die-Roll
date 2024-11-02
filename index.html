@@ -30,38 +30,172 @@
         }
 
         .roll-button {
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Die-Roll</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .dice-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .die {
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            border: 1px solid #333;
+            border-radius: 10px;
+            background: #f0f0f0;
+            position: relative;
+        }
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            background: #333;
+            border-radius: 50%;
+            position: absolute;
+        }
+
+        .die[data-value="1"] .dot:nth-child(1) { top: 50%; left: 50%; transform: translate(-50%, -50%); }
+        .die[data-value="2"] .dot:nth-child(1) { top: 25%; left: 25%; }
+        .die[data-value="2"] .dot:nth-child(2) { top: 75%; left: 75%; }
+        .die[data-value="3"] .dot:nth-child(1) { top: 25%; left: 25%; }
+        .die[data-value="3"] .dot:nth-child(2) { top: 50%; left: 50%; transform: translate(-50%, -50%); }
+        .die[data-value="3"] .dot:nth-child(3) { top: 75%; left: 75%; }
+        .die[data-value="4"] .dot:nth-child(1) { top: 25%; left: 25%; }
+        .die[data-value="4"] .dot:nth-child(2) { top: 25%; left: 75%; }
+        .die[data-value="4"] .dot:nth-child(3) { top: 75%; left: 25%; }
+        .die[data-value="4"] .dot:nth-child(4) { top: 75%; left: 75%; }
+        .die[data-value="5"] .dot:nth-child(1) { top: 25%; left: 25%; }
+        .die[data-value="5"] .dot:nth-child(2) { top: 25%; left: 75%; }
+        .die[data-value="5"] .dot:nth-child(3) { top: 50%; left: 50%; transform: translate(-50%, -50%); }
+        .die[data-value="5"] .dot:nth-child(4) { top: 75%; left: 25%; }
+        .die[data-value="5"] .dot:nth-child(5) { top: 75%; left: 75%; }
+        .die[data-value="6"] .dot:nth-child(1) { top: 25%; left: 25%; }
+        .die[data-value="6"] .dot:nth-child(2) { top: 25%; left: 50%; transform: translateX(-50%); }
+        .die[data-value="6"] .dot:nth-child(3) { top: 25%; left: 75%; }
+        .die[data-value="6"] .dot:nth-child(4) { top: 75%; left: 25%; }
+        .die[data-value="6"] .dot:nth-child(5) { top: 75%; left: 50%; transform: translateX(-50%); }
+        .die[data-value="6"] .dot:nth-child(6) { top: 75%; left: 75%; }
+
+        .roll-button, .dice-count {
             margin: 20px;
-            padding: 10px 20px;
+            padding: 10px;
             font-size: 18px;
         }
 
         .roll-history {
             margin-top: 20px;
-            font-size: 18px;
+            font-size: 16px;
         }
     </style>
 </head>
 <body>
-    <h1>3D Die Roller</h1>
-    <div id="die" class="die">1</div>
+    <h1>Die-Roll</h1>
+    <label for="diceCount">Number of Dice:</label>
+    <input type="number" id="diceCount" class="dice-count" min="1" max="10" value="1">
     <button id="rollButton" class="roll-button">Roll</button>
+    <div class="dice-container" id="diceContainer"></div>
     <div class="roll-history">
         <h3>Last 5 Rolls:</h3>
         <ul id="rollHistory"></ul>
     </div>
 
     <script>
-        const die = document.getElementById('die');
         const rollButton = document.getElementById('rollButton');
+        const diceCountInput = document.getElementById('diceCount');
+        const diceContainer = document.getElementById('diceContainer');
         const rollHistory = document.getElementById('rollHistory');
         let history = [];
 
-        function rollDie() {
+        function createDieElement() {
+            const die = document.createElement('div');
+            die.classList.add('die');
+            return die;
+        }
+
+        function updateDieFace(die, value) {
+            die.innerHTML = '';
+            die.setAttribute('data-value', value);
+            for (let i = 0; i < value; i++) {
+                const dot = document.createElement('div');
+                dot.classList.add('dot');
+                die.appendChild(dot);
+            }
+        }
+
+        function rollDice() {
             rollButton.disabled = true;
             let count = 0;
+            const dice = [];
+            diceContainer.innerHTML = '';
+            const numDice = Math.min(Math.max(diceCountInput.value, 1), 10);
+            for (let i = 0; i < numDice; i++) {
+                const die = createDieElement();
+                dice.push(die);
+                diceContainer.appendChild(die);
+            }
+
             const interval = setInterval(() => {
-                const randomNumber = Math.floor(Math.random() * 6) + 1;
-                die.textContent = randomNumber;
+                dice.forEach(die => {
+                    const randomValue = Math.floor(Math.random() * 6) + 1;
+                    updateDieFace(die, randomValue);
+                });
+                count++;
+                if (count === 5) {
+                    clearInterval(interval);
+                    rollButton.disabled = false;
+                    const finalValues = dice.map(die => parseInt(die.getAttribute('data-value')));
+                    addToHistory(finalValues);
+                }
+            }, 100); // Rolls for 0.5 seconds (5 * 100ms)
+        }
+
+        function addToHistory(values) {
+            const total = values.reduce((sum, value) => sum + value, 0);
+            const rollTime = new Date().toLocaleTimeString();
+            const historyEntry = {
+                time: rollTime,
+                values,
+                total
+            };
+            history.unshift(historyEntry);
+            if (history.length > 5) history.pop();
+            updateHistory();
+        }
+
+        function updateHistory() {
+            rollHistory.innerHTML = '';
+            history.forEach(entry => {
+                const listItem = document.createElement('li');
+                listItem.textContent = `${entry.time} - Total: ${entry.total}, Rolls: ${entry.values.join(', ')}`;
+                rollHistory.appendChild(listItem);
+            });
+        }
+
+        rollButton.addEventListener('click', rollDice);
+    </script>
+</body>
+</html>
                 count++;
                 if (count === 20) {
                     clearInterval(interval);
